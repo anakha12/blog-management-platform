@@ -84,7 +84,8 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
   const getImageUrl = () => {
     if (!blog.imageUrl) return null;
     if (blog.imageUrl.startsWith("http")) return blog.imageUrl;
-    return `http://localhost:5000${blog.imageUrl}`;
+    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    return `${baseUrl}${blog.imageUrl}`;
   };
 
   const imageUrl = getImageUrl();
