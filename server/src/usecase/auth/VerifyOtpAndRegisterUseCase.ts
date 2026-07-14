@@ -6,6 +6,7 @@ import { IOtpService } from "../../domain/services/IOtpService";
 import { IHashService } from "../../domain/services/IHashService";
 import { ITokenService } from "../../domain/services/ITokenService";
 import { UnauthorizedError } from "../../domain/exceptions/AppError";
+import { ErrorMessages } from "../../domain/constants/ErrorMessages";
 import { VerifyOtpInput } from "../validators/AuthValidators";
 import { User } from "../../domain/entities/User";
 
@@ -29,12 +30,12 @@ export class VerifyOtpAndRegisterUseCase implements IUseCase<VerifyOtpInput, Ver
     const record = await this.otpService.getOtpRecord(request.email);
     
     if (!record) {
-      throw new UnauthorizedError("OTP expired or invalid email");
+      throw new UnauthorizedError(ErrorMessages.AUTH.OTP_EXPIRED_OR_INVALID);
     }
 
     // 2. Verify OTP
     if (record.otp !== request.otp) {
-      throw new UnauthorizedError("Invalid OTP code");
+      throw new UnauthorizedError(ErrorMessages.AUTH.INVALID_OTP);
     }
 
     // 3. Hash password and create user

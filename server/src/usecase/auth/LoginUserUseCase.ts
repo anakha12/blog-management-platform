@@ -5,6 +5,7 @@ import { IUserRepository } from "../../domain/repositories/IUserRepository";
 import { IHashService } from "../../domain/services/IHashService";
 import { ITokenService } from "../../domain/services/ITokenService";
 import { UnauthorizedError } from "../../domain/exceptions/AppError";
+import { ErrorMessages } from "../../domain/constants/ErrorMessages";
 import { LoginUserInput } from "../validators/AuthValidators";
 import { User } from "../../domain/entities/User";
 
@@ -25,12 +26,12 @@ export class LoginUserUseCase implements IUseCase<LoginUserInput, IResponse> {
   async execute(request: LoginUserInput): Promise<IResponse> {
     const user = await this.userRepository.findByEmail(request.email);
     if (!user || !user.password) {
-      throw new UnauthorizedError("Invalid email or password");
+      throw new UnauthorizedError(ErrorMessages.AUTH.INVALID_EMAIL_PASSWORD);
     }
 
     const isMatch = await this.hashService.compare(request.password, user.password);
     if (!isMatch) {
-      throw new UnauthorizedError("Invalid email or password");
+      throw new UnauthorizedError(ErrorMessages.AUTH.INVALID_EMAIL_PASSWORD);
     }
 
     const tokenPayload = { id: user.id, email: user.email };

@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
 import { logger } from "../logger/logger";
+import { ErrorMessages } from "../../domain/constants/ErrorMessages";
 
 export const connectDB = async (): Promise<void> => {
   const uri = process.env.MONGO_URI;
 
   if (!uri) {
-    throw new Error("MONGO_URI is not defined in environment variables");
+    throw new Error(ErrorMessages.DATABASE.MONGO_URI_UNDEFINED);
   }
 
   try {

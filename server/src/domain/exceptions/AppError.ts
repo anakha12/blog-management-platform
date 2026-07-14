@@ -1,4 +1,5 @@
-import { StatusCodes } from "http-status-codes";
+import { HttpStatus } from "../constants/HttpStatus";
+import { ErrorMessages } from "../constants/ErrorMessages";
 
 export class AppError extends Error {
   public readonly statusCode: number;
@@ -6,7 +7,7 @@ export class AppError extends Error {
 
   constructor(
     message: string,
-    statusCode: number = StatusCodes.INTERNAL_SERVER_ERROR,
+    statusCode: number = HttpStatus.INTERNAL_SERVER_ERROR,
     isOperational: boolean = true
   ) {
     super(message);
@@ -19,30 +20,31 @@ export class AppError extends Error {
 
 export class NotFoundError extends AppError {
   constructor(resource = "Resource") {
-    super(`${resource} not found`, StatusCodes.NOT_FOUND);
+    super(ErrorMessages.BLOG.NOT_FOUND(resource), HttpStatus.NOT_FOUND);
   }
 }
 
 export class UnauthorizedError extends AppError {
   constructor(message = "Unauthorized") {
-    super(message, StatusCodes.UNAUTHORIZED);
+    super(message, HttpStatus.UNAUTHORIZED);
   }
 }
 
 export class ForbiddenError extends AppError {
   constructor(message = "Forbidden") {
-    super(message, StatusCodes.FORBIDDEN);
+    super(message, HttpStatus.FORBIDDEN);
   }
 }
 
 export class ConflictError extends AppError {
   constructor(message = "Resource already exists") {
-    super(message, StatusCodes.CONFLICT);
+    super(message, HttpStatus.CONFLICT);
   }
 }
 
 export class BadRequestError extends AppError {
   constructor(message = "Bad request") {
-    super(message, StatusCodes.BAD_REQUEST);
+    super(message, HttpStatus.BAD_REQUEST);
   }
 }
+

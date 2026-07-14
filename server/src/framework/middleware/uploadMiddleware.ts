@@ -1,6 +1,7 @@
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { ErrorMessages } from "../../domain/constants/ErrorMessages";
 
 // Ensure uploads directory exists
 const uploadDir = path.join(process.cwd(), "uploads");
@@ -31,6 +32,6 @@ export const uploadMiddleware = multer({
     if (mimetype && extname) {
       return cb(null, true);
     }
-    cb(new Error("Only .jpg, .jpeg, .png and .webp files are allowed!"));
+    cb(new Error(ErrorMessages.STORAGE.INVALID_FILE_TYPE));
   },
 });

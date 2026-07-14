@@ -4,6 +4,7 @@ import { Tokens } from "../../di/tokens";
 import { ITokenService } from "../../domain/services/ITokenService";
 import { IUserRepository } from "../../domain/repositories/IUserRepository";
 import { UnauthorizedError } from "../../domain/exceptions/AppError";
+import { ErrorMessages } from "../../domain/constants/ErrorMessages";
 import { User } from "../../domain/entities/User";
 
 interface IResponse {
@@ -19,13 +20,13 @@ export class RefreshTokenUseCase implements IUseCase<string, IResponse> {
   ) {}
 
   async execute(refreshToken: string): Promise<IResponse> {
-    // Will throw AppError if invalid/expired
+
     const decoded = this.tokenService.verifyRefreshToken(refreshToken);
 
-    // Confirm user still exists
+
     const user = await this.userRepository.findByEmail(decoded.email);
     if (!user) {
-      throw new UnauthorizedError("User no longer exists");
+      throw new UnauthorizedError(ErrorMessages.AUTH.USER_NOT_EXISTS);
     }
 
     const accessToken = this.tokenService.generateAccessToken({

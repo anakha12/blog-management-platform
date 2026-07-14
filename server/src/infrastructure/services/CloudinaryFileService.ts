@@ -2,6 +2,7 @@ import { v2 as cloudinary } from "cloudinary";
 import { injectable } from "tsyringe";
 import { IFileService } from "../../domain/services/IFileService";
 import { logger } from "../logger/logger";
+import { ErrorMessages } from "../../domain/constants/ErrorMessages";
 import fs from "fs";
 
 @injectable()
@@ -30,7 +31,7 @@ export class CloudinaryFileService implements IFileService {
       return result.secure_url;
     } catch (error) {
       logger.error("Cloudinary Upload Error:", error);
-      throw new Error("Failed to upload image to cloud");
+      throw new Error(ErrorMessages.STORAGE.CLOUDINARY_UPLOAD_FAILED);
     }
   }
 

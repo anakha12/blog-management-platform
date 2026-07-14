@@ -2,7 +2,8 @@ import jwt from "jsonwebtoken";
 import { ITokenService } from "../../domain/services/ITokenService";
 import { injectable } from "tsyringe";
 import { AppError } from "../../domain/exceptions/AppError";
-import { StatusCodes } from "http-status-codes";
+import { HttpStatus } from "../../domain/constants/HttpStatus";
+import { ErrorMessages } from "../../domain/constants/ErrorMessages";
 
 @injectable()
 export class JwtTokenService implements ITokenService {
@@ -34,7 +35,7 @@ export class JwtTokenService implements ITokenService {
     try {
       return jwt.verify(token, this.accessSecret) as { id: string; email: string };
     } catch {
-      throw new AppError("Invalid or expired access token", StatusCodes.UNAUTHORIZED);
+      throw new AppError(ErrorMessages.AUTH.INVALID_EXPIRED_ACCESS, HttpStatus.UNAUTHORIZED);
     }
   }
 
@@ -42,7 +43,7 @@ export class JwtTokenService implements ITokenService {
     try {
       return jwt.verify(token, this.refreshSecret) as { id: string; email: string };
     } catch {
-      throw new AppError("Invalid or expired refresh token", StatusCodes.UNAUTHORIZED);
+      throw new AppError(ErrorMessages.AUTH.INVALID_EXPIRED_REFRESH, HttpStatus.UNAUTHORIZED);
     }
   }
 }

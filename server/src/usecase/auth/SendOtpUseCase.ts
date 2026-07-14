@@ -5,6 +5,7 @@ import { IUserRepository } from "../../domain/repositories/IUserRepository";
 import { IOtpService } from "../../domain/services/IOtpService";
 import { IEmailService } from "../../domain/services/IEmailService";
 import { ConflictError } from "../../domain/exceptions/AppError";
+import { ErrorMessages } from "../../domain/constants/ErrorMessages";
 import { RegisterUserInput } from "../validators/AuthValidators";
 
 @injectable()
@@ -18,7 +19,7 @@ export class SendOtpUseCase implements IUseCase<RegisterUserInput, void> {
   async execute(request: RegisterUserInput): Promise<void> {
     const existingUser = await this.userRepository.findByEmail(request.email);
     if (existingUser) {
-      throw new ConflictError("Email is already registered");
+      throw new ConflictError(ErrorMessages.AUTH.EMAIL_REGISTERED);
     }
 
     // storeOtp now handles generation internally and returns the OTP

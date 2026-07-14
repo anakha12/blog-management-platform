@@ -4,6 +4,7 @@ import { Tokens } from "../../di/tokens";
 import { IBlogRepository } from "../../domain/repositories/IBlogRepository";
 import { IFileService } from "../../domain/services/IFileService";
 import { NotFoundError, ForbiddenError } from "../../domain/exceptions/AppError";
+import { ErrorMessages } from "../../domain/constants/ErrorMessages";
 
 export interface DeleteBlogRequest {
   id: string;
@@ -25,7 +26,7 @@ export class DeleteBlogUseCase implements IUseCase<DeleteBlogRequest, boolean> {
 
     // Authorization check
     if (blog.authorId !== request.authorId) {
-      throw new ForbiddenError("You are not authorized to delete this blog post");
+      throw new ForbiddenError(ErrorMessages.BLOG.UNAUTHORIZED_DELETE);
     }
 
     // Delete from cloud if image exists

@@ -41,23 +41,38 @@ export const LoginPage: React.FC = () => {
             id="email"
             label="Email"
             type="email"
+            maxLength={255}
             placeholder="e.g. john@example.com"
             error={errors.email?.message}
-            {...register("email", { required: "Email is required" })}
+            {...register("email", { 
+              required: "Email is required",
+              maxLength: { value: 255, message: "Email cannot exceed 255 characters" },
+              pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: "Invalid email address" }
+            })}
           />
           <Input
             id="password"
             label="Password"
             type="password"
+            maxLength={100}
             placeholder="Enter your password"
             error={errors.password?.message}
-            {...register("password", { required: "Password is required" })}
+            {...register("password", { 
+              required: "Password is required",
+              maxLength: { value: 100, message: "Password cannot exceed 100 characters" }
+            })}
           />
 
-          {apiError && (
-            <div className="text-center p-3 rounded-xl text-sm text-red-400"
+          {error && (
+            <div className="p-3 rounded-xl text-sm text-red-400 space-y-1"
               style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
-              {apiError}
+              {((error as any).response?.data?.errors) ? (
+                ((error as any).response.data.errors.map((err: any, idx: number) => (
+                  <p key={idx} className="text-xs text-left font-medium">• {err.message}</p>
+                )))
+              ) : (
+                <p className="text-center font-medium">{((error as any).response?.data?.message) || "Login failed"}</p>
+              )}
             </div>
           )}
 

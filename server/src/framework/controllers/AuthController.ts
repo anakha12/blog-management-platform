@@ -5,13 +5,15 @@ import { LoginUserUseCase } from "../../usecase/auth/LoginUserUseCase";
 import { RefreshTokenUseCase } from "../../usecase/auth/RefreshTokenUseCase";
 import { RegisterUserSchema, LoginUserSchema, VerifyOtpSchema } from "../../usecase/validators/AuthValidators";
 import { UserMapper } from "../mappers/UserMapper";
-import { StatusCodes } from "http-status-codes";
+import { HttpStatus } from "../../domain/constants/HttpStatus";
+import { ErrorMessages } from "../../domain/constants/ErrorMessages";
+import { SuccessMessages } from "../../domain/constants/SuccessMessages";
 import { injectable, inject } from "tsyringe";
 import { Tokens } from "../../di/tokens";
 import { AppError } from "../../domain/exceptions/AppError";
 
 const REFRESH_COOKIE = "refreshToken";
-const COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; 
 
 @injectable()
 export class AuthController {
@@ -26,9 +28,9 @@ export class AuthController {
     const validatedData = RegisterUserSchema.parse(req.body);
     await this.sendOtpUseCase.execute(validatedData);
 
-    res.status(StatusCodes.OK).json({
+    res.status(HttpStatus.OK).json({
       success: true,
-      message: "OTP sent to your email. Please verify to complete registration.",
+      message: SuccessMessages.AUTH.OTP_SENT,
     });
   };
 
@@ -43,9 +45,9 @@ export class AuthController {
       maxAge: COOKIE_MAX_AGE_MS,
     });
 
-    res.status(StatusCodes.CREATED).json({
+    res.status(HttpStatus.CREATED).json({
       success: true,
-      message: "User registered successfully",
+      message: SuccessMessages.AUTH.REGISTERED,
       data: {
         user: UserMapper.toResponse(result.user),
         accessToken: result.accessToken,
@@ -64,9 +66,9 @@ export class AuthController {
       maxAge: COOKIE_MAX_AGE_MS,
     });
 
-    res.status(StatusCodes.OK).json({
+    res.status(HttpStatus.OK).json({
       success: true,
-      message: "User logged in successfully",
+      message: SuccessMessages.AUTH.LOGGED_IN,
       data: {
         user: UserMapper.toResponse(result.user),
         accessToken: result.accessToken,
@@ -77,12 +79,12 @@ export class AuthController {
   refresh = async (req: Request, res: Response): Promise<void> => {
     const refreshToken = req.cookies?.[REFRESH_COOKIE] as string | undefined;
     if (!refreshToken) {
-      throw new AppError("Refresh token not found", StatusCodes.UNAUTHORIZED);
+      throw new AppError(ErrorMessages.AUTH.REFRESH_TOKEN_NOT_FOUND, HttpStatus.UNAUTHORIZED);
     }
 
     const result = await this.refreshTokenUseCase.execute(refreshToken);
 
-    res.status(StatusCodes.OK).json({
+    res.status(HttpStatus.OK).json({
       success: true,
       data: { 
         accessToken: result.accessToken,
@@ -98,9 +100,9 @@ export class AuthController {
       sameSite: "strict",
     });
 
-    res.status(StatusCodes.OK).json({
+    res.status(HttpStatus.OK).json({
       success: true,
-      message: "Logged out successfully",
+      message: SuccessMessages.AUTH.LOGGED_OUT,
     });
   };
 }

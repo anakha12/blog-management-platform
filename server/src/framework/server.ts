@@ -14,6 +14,8 @@ import { apiRouter } from "./routes";
 import { connectDB } from "../infrastructure/database/db";
 import { logger } from "../infrastructure/logger/logger";
 
+
+
 const app: Application = express();
 const PORT = process.env.PORT || 5000;
 
@@ -43,7 +45,7 @@ const startServer = async (): Promise<void> => {
     await connectDB();
     app.listen(PORT, () => {
       logger.info(
-        `🚀 Server running on http://localhost:${PORT} [${process.env.NODE_ENV}]`
+        ` Server running on http://localhost:${PORT} [${process.env.NODE_ENV}]`
       );
     });
   } catch (error) {

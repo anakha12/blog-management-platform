@@ -21,19 +21,25 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
   const [title, setTitle] = useState(blog.title);
   const [content, setContent] = useState(blog.content);
   const [image, setImage] = useState<File | null>(null);
-  const [localError, setLocalError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ title?: string; content?: string }>({});
 
   const handleUpdate = () => {
+    const errors: { title?: string; content?: string } = {};
     if (title.trim().length < 3) {
-      setLocalError("Title must be at least 3 characters");
-      return; 
+      errors.title = "Title must be at least 3 characters";
+    } else if (title.trim().length > 100) {
+      errors.title = "Title cannot exceed 100 characters";
     }
     if (content.trim().length < 10) {
-      setLocalError("Content must be at least 10 characters");
+      errors.content = "Content must be at least 10 characters";
+    } else if (content.trim().length > 5000) {
+      errors.content = "Content cannot exceed 5000 characters";
+    }
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
-
-    setLocalError(null);
+    setFieldErrors({});
     updateMutation.mutate(
       { 
         id: blog.id, 
@@ -50,6 +56,29 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
         } 
       }
     );
+  };
+
+  const responseData = (updateMutation.error as any)?.response?.data;
+  const validationErrors = responseData?.errors || [];
+  const titleError = fieldErrors.title || validationErrors.find((e: any) => e.field === "title")?.message;
+  const contentError = fieldErrors.content || validationErrors.find((e: any) => e.field === "content")?.message;
+  const imageError = validationErrors.find((e: any) => e.field === "image")?.message || 
+                     (responseData?.message?.toLowerCase().includes("file") || responseData?.message?.toLowerCase().includes("image") || responseData?.message?.toLowerCase().includes("allowed") ? responseData?.message : null);
+
+  const getSummaryErrors = (): string[] => {
+    const list: string[] = [];
+    if (fieldErrors.title) list.push(fieldErrors.title);
+    if (fieldErrors.content) list.push(fieldErrors.content);
+    if (validationErrors.length > 0) {
+      validationErrors.forEach((e: any) => {
+        if (e.message) list.push(e.message);
+      });
+    } else if (responseData?.message) {
+      list.push(responseData.message);
+    } else if (updateMutation.error) {
+      list.push((updateMutation.error as any).message || "Update failed");
+    }
+    return list;
   };
 
   const getImageUrl = () => {
@@ -129,25 +158,29 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
               <Input
                 label="Title"
                 id={`edit-title-${blog.id}`}
+                maxLength={100}
                 value={title}
                 onChange={(e) => {
                   setTitle(e.target.value);
-                  setLocalError(null);
+                  setFieldErrors(prev => ({ ...prev, title: undefined }));
                   updateMutation.reset(); 
                 }}
                 placeholder="Enter blog title..."
+                error={titleError}
               />
               <Textarea
                 label="Content"
                 id={`edit-content-${blog.id}`}
+                maxLength={5000}
                 value={content}
                 rows={4}
                 onChange={(e) => {
                   setContent(e.target.value);
-                  setLocalError(null);
+                  setFieldErrors(prev => ({ ...prev, content: undefined }));
                   updateMutation.reset(); 
                 }}
                 placeholder="Write your blog content..."
+                error={contentError}
               />
 
               <div>
@@ -161,14 +194,17 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
                   }}
                   className="text-xs text-slate-400 cursor-pointer file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-violet-900/40 file:text-violet-300 hover:file:bg-violet-900/60 transition-all"
                 />
-                {image && <p className="text-[10px] text-violet-400 mt-2 font-medium">📎 Selected: {image.name}</p>}
+                {imageError && <p className="error-msg mt-1.5">{imageError}</p>}
+                {image && !imageError && <p className="text-[10px] text-violet-400 mt-2 font-medium">📎 Selected: {image.name}</p>}
               </div>
 
-              {(localError || updateMutation.isError) && (
-                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-                  <p className="text-xs text-red-400">
-                    {localError || ((updateMutation.error as any).response?.data?.message) || "Update failed"}
-                  </p>
+              {(fieldErrors.title || fieldErrors.content || updateMutation.isError) && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 space-y-1">
+                  {getSummaryErrors().map((msg, index) => (
+                    <p key={index} className="text-xs text-red-400">
+                      • {msg}
+                    </p>
+                  ))}
                 </div>
               )}
 

@@ -1,30 +1,31 @@
 import { z } from "zod";
+import { ErrorMessages } from "../../domain/constants/ErrorMessages";
 
 export const CreateBlogSchema = z.object({
   title: z
     .string()
     .trim()
-    .min(3, "Title must be at least 3 characters")
-    .max(100, "Title cannot exceed 100 characters"),
+    .min(3, ErrorMessages.VALIDATION.TITLE_MIN)
+    .max(100, ErrorMessages.VALIDATION.TITLE_MAX),
   content: z
     .string()
     .trim()
-    .min(10, "Content must be at least 10 characters")
-    .max(5000, "Content cannot exceed 5000 characters"),
+    .min(10, ErrorMessages.VALIDATION.CONTENT_MIN)
+    .max(5000, ErrorMessages.VALIDATION.CONTENT_MAX),
 });
 
 export const UpdateBlogSchema = z.object({
   title: z
     .string()
     .trim()
-    .min(3, "Title must be at least 3 characters")
-    .max(100, "Title cannot exceed 100 characters")
+    .min(3, ErrorMessages.VALIDATION.TITLE_MIN)
+    .max(100, ErrorMessages.VALIDATION.TITLE_MAX)
     .optional(),
   content: z
     .string()
     .trim()
-    .min(10, "Content must be at least 10 characters")
-    .max(5000, "Content cannot exceed 5000 characters")
+    .min(10, ErrorMessages.VALIDATION.CONTENT_MIN)
+    .max(5000, ErrorMessages.VALIDATION.CONTENT_MAX)
     .optional(),
 });
 

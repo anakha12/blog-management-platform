@@ -4,6 +4,7 @@ import { Tokens } from "../../di/tokens";
 import { IBlogRepository } from "../../domain/repositories/IBlogRepository";
 import { IFileService } from "../../domain/services/IFileService";
 import { NotFoundError, ForbiddenError } from "../../domain/exceptions/AppError";
+import { ErrorMessages } from "../../domain/constants/ErrorMessages";
 import { UpdateBlogInput } from "../validators/BlogValidators";
 import { Blog } from "../../domain/entities/Blog";
 
@@ -29,7 +30,7 @@ export class UpdateBlogUseCase implements IUseCase<UpdateBlogRequest, Blog | nul
     
     // Authorization check
     if (blog.authorId !== request.authorId) {
-      throw new ForbiddenError("You are not authorized to update this blog post");
+      throw new ForbiddenError(ErrorMessages.BLOG.UNAUTHORIZED_UPDATE);
     }
 
     const updateData: Partial<Blog> = { ...request.data };

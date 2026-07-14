@@ -9,7 +9,7 @@ export const apiRouter = Router();
 apiRouter.get("/health", (_req, res) => {
   res.json({
     success: true,
-    message: "API is healthy 🟢",
+    message: "API is healthy",
     timestamp: new Date().toISOString(),
   });
 });

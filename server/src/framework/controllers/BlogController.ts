@@ -6,7 +6,8 @@ import { UpdateBlogUseCase } from "../../usecase/blog/UpdateBlogUseCase";
 import { DeleteBlogUseCase } from "../../usecase/blog/DeleteBlogUseCase";
 import { CreateBlogSchema, UpdateBlogSchema } from "../../usecase/validators/BlogValidators";
 import { BlogMapper } from "../mappers/BlogMapper";
-import { StatusCodes } from "http-status-codes";
+import { HttpStatus } from "../../domain/constants/HttpStatus";
+import { SuccessMessages } from "../../domain/constants/SuccessMessages";
 import { injectable, inject } from "tsyringe";
 import { Tokens } from "../../di/tokens";
 
@@ -36,9 +37,9 @@ export class BlogController {
       localImagePath 
     });
 
-    res.status(StatusCodes.CREATED).json({
+    res.status(HttpStatus.CREATED).json({
       success: true,
-      message: "Blog created successfully",
+      message: SuccessMessages.BLOG.CREATED,
       data: BlogMapper.toResponse(result),
     });
   };
@@ -46,7 +47,7 @@ export class BlogController {
   getAll = async (_req: Request, res: Response): Promise<void> => {
     const result = await this.getAllBlogsUseCase.execute();
     
-    res.status(StatusCodes.OK).json({
+    res.status(HttpStatus.OK).json({
       success: true,
       data: result.map(BlogMapper.toResponse),
     });
@@ -55,7 +56,7 @@ export class BlogController {
   getById = async (req: Request, res: Response): Promise<void> => {
     const result = await this.getBlogByIdUseCase.execute(req.params.id as string);
     
-    res.status(StatusCodes.OK).json({
+    res.status(HttpStatus.OK).json({
       success: true,
       data: BlogMapper.toResponse(result),
     });
@@ -73,9 +74,9 @@ export class BlogController {
       imageUrl: localImagePath // Note: UpdateBlogUseCase also needs logic change
     });
 
-    res.status(StatusCodes.OK).json({
+    res.status(HttpStatus.OK).json({
       success: true,
-      message: "Blog updated successfully",
+      message: SuccessMessages.BLOG.UPDATED,
       data: result ? BlogMapper.toResponse(result) : null,
     });
   };
@@ -84,9 +85,9 @@ export class BlogController {
     const authorId = req.user!.id;
     await this.deleteBlogUseCase.execute({ id: req.params.id as string, authorId });
 
-    res.status(StatusCodes.OK).json({
+    res.status(HttpStatus.OK).json({
       success: true,
-      message: "Blog deleted successfully",
+      message: SuccessMessages.BLOG.DELETED,
     });
   };
 }

@@ -71,31 +71,52 @@ export const RegisterPage: React.FC = () => {
               id="name"
               label="What's your name?"
               type="text"
+              maxLength={50}
               placeholder="e.g. John Doe"
               error={infoErrors.name?.message}
-              {...infoForm("name", { required: "Name is required", minLength: { value: 2, message: "Min 2 characters" } })}
+              {...infoForm("name", { 
+                required: "Name is required", 
+                minLength: { value: 2, message: "Min 2 characters" },
+                maxLength: { value: 50, message: "Name cannot exceed 50 characters" }
+              })}
             />
             <Input
               id="email"
               label="Email Address"
               type="email"
+              maxLength={255}
               placeholder="e.g. john@example.com"
               error={infoErrors.email?.message}
-              {...infoForm("email", { required: "Email is required" })}
+              {...infoForm("email", { 
+                required: "Email is required",
+                maxLength: { value: 255, message: "Email cannot exceed 255 characters" },
+                pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: "Invalid email address" }
+              })}
             />
             <Input
               id="password"
               label="Create Password"
               type="password"
+              maxLength={100}
               placeholder="Choose a strong password"
               error={infoErrors.password?.message}
-              {...infoForm("password", { required: "Password is required", minLength: { value: 6, message: "Min 6 characters" } })}
+              {...infoForm("password", { 
+                required: "Password is required", 
+                minLength: { value: 6, message: "Min 6 characters" },
+                maxLength: { value: 100, message: "Password cannot exceed 100 characters" }
+              })}
             />
 
-            {apiError && (
-              <div className="text-center p-3 rounded-xl text-sm text-red-400"
+            {error && (
+              <div className="p-3 rounded-xl text-sm text-red-400 space-y-1"
                 style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
-                {apiError}
+                {((error as any).response?.data?.errors) ? (
+                  ((error as any).response.data.errors.map((err: any, idx: number) => (
+                    <p key={idx} className="text-xs text-left font-medium">• {err.message}</p>
+                  )))
+                ) : (
+                  <p className="text-center font-medium">{((error as any).response?.data?.message) || "Something went wrong"}</p>
+                )}
               </div>
             )}
 
@@ -109,20 +130,27 @@ export const RegisterPage: React.FC = () => {
               id="otp"
               label="Enter OTP Code"
               type="text"
+              maxLength={6}
               placeholder="Enter the 6-digit code"
               error={otpErrors.otp?.message}
               {...otpForm("otp", { 
                 required: "OTP is required", 
                 minLength: { value: 6, message: "Must be 6 digits" },
                 maxLength: { value: 6, message: "Must be 6 digits" },
-                pattern: { value: /^[0-9]+$/, message: "Only numbers allowed" }
+                pattern: { value: /^[0-9]+$/, message: "OTP must contain only numbers" }
               })}
             />
 
-            {apiError && (
-              <div className="text-center p-3 rounded-xl text-sm text-red-400"
+            {error && (
+              <div className="p-3 rounded-xl text-sm text-red-400 space-y-1"
                 style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
-                {apiError}
+                {((error as any).response?.data?.errors) ? (
+                  ((error as any).response.data.errors.map((err: any, idx: number) => (
+                    <p key={idx} className="text-xs text-left font-medium">• {err.message}</p>
+                  )))
+                ) : (
+                  <p className="text-center font-medium">{((error as any).response?.data?.message) || "Something went wrong"}</p>
+                )}
               </div>
             )}
 
