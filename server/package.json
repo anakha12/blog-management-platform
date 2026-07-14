@@ -1,11 +1,14 @@
 {
   "name": "server",
   "version": "1.0.0",
+  "engines": {
+    "node": "22.x"
+  },
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/framework/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/framework/server.js"
   },
   "keywords": [],
   "author": "",
