@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, Link } from "react-router-dom";
@@ -9,10 +9,17 @@ import { RegisterUserSchema, RegisterUserInput, ClientVerifyOtpSchema, ClientVer
 interface InfoValues extends RegisterUserInput {}
 interface OtpValues extends ClientVerifyOtpInput {}
 
+const OTP_DURATION = 300; // 5 minutes in seconds, matches server OTP_EXPIRES_SECONDS
+
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState<"info" | "otp">("info");
   const [userEmail, setUserEmail] = useState("");
+  const [userInfo, setUserInfo] = useState<InfoValues | null>(null);
+
+  // Countdown timer state
+  const [timeLeft, setTimeLeft] = useState(OTP_DURATION);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const registerMutation = useRegisterMutation();
   const verifyOtpMutation = useVerifyOtpMutation();
@@ -24,10 +31,42 @@ export const RegisterPage: React.FC = () => {
     resolver: zodResolver(ClientVerifyOtpSchema),
   });
 
+  // Start countdown timer
+  const startTimer = () => {
+    setTimeLeft(OTP_DURATION);
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
   const onInfoSubmit = (data: InfoValues) => {
     setUserEmail(data.email);
+    setUserInfo(data);
     registerMutation.mutate(data, {
-      onSuccess: () => setStep("otp")
+      onSuccess: () => {
+        setStep("otp");
+        startTimer();
+      }
     });
   };
 
@@ -38,12 +77,17 @@ export const RegisterPage: React.FC = () => {
     );
   };
 
-  const error = registerMutation.error || verifyOtpMutation.error;
-  const apiError = error
-    ? (error instanceof Error && (error as any).response?.data?.message) || "Something went wrong"
-    : null;
+  const handleResendOtp = () => {
+    if (!userInfo || timeLeft > 0) return;
+    registerMutation.reset();
+    registerMutation.mutate(userInfo, {
+      onSuccess: () => startTimer(),
+    });
+  };
 
+  const error = registerMutation.error || verifyOtpMutation.error;
   const isPending = registerMutation.isPending || verifyOtpMutation.isPending;
+  const timerExpired = timeLeft === 0;
 
   return (
     <div className="min-h-screen bg-grid flex items-center justify-center px-4">
@@ -123,6 +167,26 @@ export const RegisterPage: React.FC = () => {
               {...otpForm("otp")}
             />
 
+            {/* Countdown Timer */}
+            <div className="flex items-center justify-center gap-2">
+              {timerExpired ? (
+                <p className="text-xs text-red-400 font-medium">⚠ OTP expired — please resend</p>
+              ) : (
+                <>
+                  <div
+                    className="w-2 h-2 rounded-full animate-pulse"
+                    style={{ background: timeLeft < 60 ? "#f87171" : "#a78bfa" }}
+                  />
+                  <p
+                    className="text-xs font-mono font-medium"
+                    style={{ color: timeLeft < 60 ? "#f87171" : "#a78bfa" }}
+                  >
+                    OTP expires in {formatTime(timeLeft)}
+                  </p>
+                </>
+              )}
+            </div>
+
             {error && (
               <div className="p-3 rounded-xl text-sm text-red-400 space-y-1"
                 style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
@@ -136,16 +200,35 @@ export const RegisterPage: React.FC = () => {
               </div>
             )}
 
-            <button type="submit" className="btn-primary" disabled={isPending}>
+            <button type="submit" className="btn-primary" disabled={isPending || timerExpired}>
               {isPending ? "Verifying…" : "Complete Registration"}
             </button>
-            
-            <button 
-              type="button" 
+
+            {/* Resend OTP */}
+            <div className="text-center">
+              {timerExpired ? (
+                <button
+                  type="button"
+                  id="resend-otp-btn"
+                  onClick={handleResendOtp}
+                  disabled={registerMutation.isPending}
+                  className="text-sm font-medium text-violet-400 hover:text-violet-300 transition-colors disabled:opacity-50"
+                >
+                  {registerMutation.isPending ? "Sending new OTP…" : "↺ Resend OTP"}
+                </button>
+              ) : (
+                <p className="text-xs text-slate-600">
+                  Didn't receive the code? Resend available after timer expires
+                </p>
+              )}
+            </div>
+
+            <button
+              type="button"
               onClick={() => setStep("info")}
               className="w-full text-sm text-slate-400 hover:text-white transition-colors"
             >
-              Back to registration
+              ← Back to registration
             </button>
           </form>
         )}
