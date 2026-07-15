@@ -9,7 +9,7 @@ import { MongoBlogRepository } from "../infrastructure/repositories/MongoBlogRep
 import { BcryptHashService } from "../infrastructure/services/BcryptHashService";
 import { JwtTokenService } from "../infrastructure/services/JwtTokenService";
 import { RedisOtpService } from "../infrastructure/services/RedisOtpService";
-import { NodemailerEmailService } from "../infrastructure/services/NodemailerEmailService";
+import { ResendEmailService } from "../infrastructure/services/ResendEmailService";
 import { CloudinaryFileService } from "../infrastructure/services/CloudinaryFileService";
 
 // Auth UseCases
@@ -33,7 +33,7 @@ container.registerSingleton(Tokens.BlogRepository, MongoBlogRepository);
 container.registerSingleton(Tokens.HashService, BcryptHashService);
 container.registerSingleton(Tokens.TokenService, JwtTokenService);
 container.registerSingleton(Tokens.OtpService, RedisOtpService);
-container.registerSingleton(Tokens.EmailService, NodemailerEmailService);
+container.registerSingleton(Tokens.EmailService, ResendEmailService);
 container.registerSingleton(Tokens.FileService, CloudinaryFileService);
 
 // Register Auth UseCases
