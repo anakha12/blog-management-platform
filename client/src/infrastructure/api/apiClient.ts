@@ -33,7 +33,11 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Skip retry logic if the failing request IS the refresh endpoint itself
+    // (user is simply not logged in — that is fine for public pages)
+    const isRefreshRequest = originalRequest?.url?.includes("/auth/refresh");
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isRefreshRequest) {
       if (isRefreshing) {
         // Queue subsequent 401s until refresh finishes
         return new Promise((resolve, reject) => {
