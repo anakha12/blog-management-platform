@@ -1,18 +1,19 @@
 import React from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, Link } from "react-router-dom";
 import { useLoginMutation } from "../../application/queries/useAuthQueries";
 import { Input } from "../components/ui/Input";
+import { LoginUserSchema, LoginUserInput } from "../../application/validators/AuthValidators";
 
-interface FormValues {
-  email: string;
-  password: string;
-}
+interface FormValues extends LoginUserInput {}
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { mutate, isPending, error } = useLoginMutation();
-  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
+  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
+    resolver: zodResolver(LoginUserSchema),
+  });
 
   const onSubmit = (data: FormValues) => {
     mutate(data, { onSuccess: () => navigate("/dashboard") });
@@ -44,11 +45,7 @@ export const LoginPage: React.FC = () => {
             maxLength={255}
             placeholder="e.g. john@example.com"
             error={errors.email?.message}
-            {...register("email", { 
-              required: "Email is required",
-              maxLength: { value: 255, message: "Email cannot exceed 255 characters" },
-              pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: "Invalid email address" }
-            })}
+            {...register("email")}
           />
           <Input
             id="password"
@@ -57,10 +54,7 @@ export const LoginPage: React.FC = () => {
             maxLength={100}
             placeholder="Enter your password"
             error={errors.password?.message}
-            {...register("password", { 
-              required: "Password is required",
-              maxLength: { value: 100, message: "Password cannot exceed 100 characters" }
-            })}
+            {...register("password")}
           />
 
           {error && (

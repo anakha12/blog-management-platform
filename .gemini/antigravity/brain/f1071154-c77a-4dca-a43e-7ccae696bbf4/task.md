@@ -1,0 +1,8 @@
+- [x] Install `@hookform/resolvers` in the client directory
+- [x] Create `AuthValidators.ts` in the client codebase
+- [x] Create `BlogValidators.ts` in the client codebase
+- [x] Update `LoginPage.tsx` to use Zod resolver
+- [x] Update `RegisterPage.tsx` to use Zod resolver
+- [x] Update `DashboardPage.tsx` to use Zod safeParse validation
+- [x] Update `BlogCard.tsx` to use Zod safeParse validation
+- [x] Verify server and client builds compile successfully

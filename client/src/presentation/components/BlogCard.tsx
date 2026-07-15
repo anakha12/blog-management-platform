@@ -4,6 +4,7 @@ import { useAuthStore } from "../../application/state/authStore";
 import { useDeleteBlogMutation, useUpdateBlogMutation } from "../../application/queries/useBlogQueries";
 import { Textarea } from "./ui/Textarea";
 import { Input } from "./ui/Input";
+import { UpdateBlogSchema } from "../../application/validators/BlogValidators";
 
 interface BlogCardProps {
   blog: Blog;
@@ -24,18 +25,13 @@ export const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
   const [fieldErrors, setFieldErrors] = useState<{ title?: string; content?: string }>({});
 
   const handleUpdate = () => {
-    const errors: { title?: string; content?: string } = {};
-    if (title.trim().length < 3) {
-      errors.title = "Title must be at least 3 characters";
-    } else if (title.trim().length > 100) {
-      errors.title = "Title cannot exceed 100 characters";
-    }
-    if (content.trim().length < 10) {
-      errors.content = "Content must be at least 10 characters";
-    } else if (content.trim().length > 5000) {
-      errors.content = "Content cannot exceed 5000 characters";
-    }
-    if (Object.keys(errors).length > 0) {
+    const result = UpdateBlogSchema.safeParse({ title: title.trim(), content: content.trim() });
+    if (!result.success) {
+      const errors: { title?: string; content?: string } = {};
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0] as "title" | "content";
+        errors[field] = issue.message;
+      });
       setFieldErrors(errors);
       return;
     }

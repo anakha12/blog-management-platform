@@ -1,18 +1,13 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, Link } from "react-router-dom";
 import { useRegisterMutation, useVerifyOtpMutation } from "../../application/queries/useAuthQueries";
 import { Input } from "../components/ui/Input";
+import { RegisterUserSchema, RegisterUserInput, ClientVerifyOtpSchema, ClientVerifyOtpInput } from "../../application/validators/AuthValidators";
 
-interface InfoValues {
-  name: string;
-  email: string;
-  password: string;
-}
-
-interface OtpValues {
-  otp: string;
-}
+interface InfoValues extends RegisterUserInput {}
+interface OtpValues extends ClientVerifyOtpInput {}
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -22,8 +17,12 @@ export const RegisterPage: React.FC = () => {
   const registerMutation = useRegisterMutation();
   const verifyOtpMutation = useVerifyOtpMutation();
 
-  const { register: infoForm, handleSubmit: handleInfoSubmit, formState: { errors: infoErrors } } = useForm<InfoValues>();
-  const { register: otpForm, handleSubmit: handleOtpSubmit, formState: { errors: otpErrors } } = useForm<OtpValues>();
+  const { register: infoForm, handleSubmit: handleInfoSubmit, formState: { errors: infoErrors } } = useForm<InfoValues>({
+    resolver: zodResolver(RegisterUserSchema),
+  });
+  const { register: otpForm, handleSubmit: handleOtpSubmit, formState: { errors: otpErrors } } = useForm<OtpValues>({
+    resolver: zodResolver(ClientVerifyOtpSchema),
+  });
 
   const onInfoSubmit = (data: InfoValues) => {
     setUserEmail(data.email);
@@ -74,11 +73,7 @@ export const RegisterPage: React.FC = () => {
               maxLength={50}
               placeholder="e.g. John Doe"
               error={infoErrors.name?.message}
-              {...infoForm("name", { 
-                required: "Name is required", 
-                minLength: { value: 2, message: "Min 2 characters" },
-                maxLength: { value: 50, message: "Name cannot exceed 50 characters" }
-              })}
+              {...infoForm("name")}
             />
             <Input
               id="email"
@@ -87,11 +82,7 @@ export const RegisterPage: React.FC = () => {
               maxLength={255}
               placeholder="e.g. john@example.com"
               error={infoErrors.email?.message}
-              {...infoForm("email", { 
-                required: "Email is required",
-                maxLength: { value: 255, message: "Email cannot exceed 255 characters" },
-                pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: "Invalid email address" }
-              })}
+              {...infoForm("email")}
             />
             <Input
               id="password"
@@ -100,11 +91,7 @@ export const RegisterPage: React.FC = () => {
               maxLength={100}
               placeholder="Choose a strong password"
               error={infoErrors.password?.message}
-              {...infoForm("password", { 
-                required: "Password is required", 
-                minLength: { value: 6, message: "Min 6 characters" },
-                maxLength: { value: 100, message: "Password cannot exceed 100 characters" }
-              })}
+              {...infoForm("password")}
             />
 
             {error && (
@@ -133,12 +120,7 @@ export const RegisterPage: React.FC = () => {
               maxLength={6}
               placeholder="Enter the 6-digit code"
               error={otpErrors.otp?.message}
-              {...otpForm("otp", { 
-                required: "OTP is required", 
-                minLength: { value: 6, message: "Must be 6 digits" },
-                maxLength: { value: 6, message: "Must be 6 digits" },
-                pattern: { value: /^[0-9]+$/, message: "OTP must contain only numbers" }
-              })}
+              {...otpForm("otp")}
             />
 
             {error && (

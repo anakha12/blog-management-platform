@@ -31,6 +31,9 @@ const AppContent: React.FC = () => {
         const { user, accessToken } = await authRepo.refresh();
         setAuth(user, accessToken);
       } catch (error) {
+        // refresh failed — user is not logged in, that's fine
+      } finally {
+        // Always stop the loading spinner, even on CORS/network errors
         setLoading(false);
       }
     };
