@@ -33,11 +33,13 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Skip retry logic if the failing request IS the refresh endpoint itself
-    // (user is simply not logged in — that is fine for public pages)
-    const isRefreshRequest = originalRequest?.url?.includes("/auth/refresh");
+    // Skip retry logic for all auth endpoints:
+    // - /auth/refresh: user is simply not logged in (fine for public pages)
+    // - /auth/login:   401 means wrong credentials, not expired token
+    // - /auth/register: same reasoning
+    const isAuthRequest = originalRequest?.url?.includes("/auth/");
 
-    if (error.response?.status === 401 && !originalRequest._retry && !isRefreshRequest) {
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRequest) {
       if (isRefreshing) {
         // Queue subsequent 401s until refresh finishes
         return new Promise((resolve, reject) => {
